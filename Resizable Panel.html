@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>resizable</title>
+	<style>
+		*{padding: 0; margin: 0;}
+		body{
+			margin: 0px;
+			padding: 50px;
+			font-size: 14px;
+			color: #333;
+		}
+
+		.panel{
+			width: 400px;
+			height: 240px;
+			border: 1px solid #ccc;
+			position: relative;
+		}
+
+		.panel .title{
+			background-color: #eee;
+			line-height: 30px;
+			text-align: center;
+			font-weight: bold;
+			border-bottom: 1px solid #fff;
+		}
+		.panel .resizable_r{
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 10px;
+			height: 100%;
+			cursor: e-resize;
+		}
+		.panel .resizable_b{
+			position: absolute;
+			bottom: 0;
+			right: 0;
+			width: 100%;
+			height: 10px;
+			cursor: s-resize;
+		}
+		.panel .resizable_rb{
+			position: absolute;
+			bottom: 0;
+			right: 0;
+			width: 10px;
+			height: 10px;
+			cursor: nw-resize;
+		}
+	</style>
+</head>
+<body>
+	<div class="panel" id="panel">
+		<div class="title">
+			Resizable Panel
+		</div>
+		
+	</div>
+
+	<script>
+		var moving =0,
+			m_from_x=0,
+			m_from_y=0,
+			m_to_x=0,
+			m_to_y=0;
+
+		var m_panel,
+			m_ctrl,
+			m_type;
+		//4、当鼠标移动的时候，记录鼠标的最终位置
+		document.onmousemove = function(e) {
+			var e = e || window.event;
+			m_to_x = e.pageX;
+			m_to_y = e.pageY;
+		}
+		//3、当鼠标按下的时候，记录鼠标的原始位置
+		function on_mousedown(e, panel, ctrl, type) {
+			var e = e || window.event;
+			m_from_x = e.pageX - ctrl.offsetLeft;
+			m_from_y = e.pageY - ctrl.offsetTop;
+
+			m_panel = panel;
+			m_ctrl = ctrl;
+			m_type = type;
+
+			moving = setInterval(on_move, 10);
+		}
+		//5、实现控制条的拖拽
+		function on_move() {
+			if(moving) {
+				var to_x = m_to_x - m_from_x;
+				var to_y = m_to_y - m_from_y;
+
+				//6、拖拽位置的限定
+				to_x = Math.max(to_x, m_panel.offsetLeft);
+				to_y = Math.max(to_y, m_panel.offsetTop);
+				
+				
+				
+				switch(m_type) {
+					case 'r':
+						m_ctrl.style.left = to_x + 'px';
+						m_panel.style.width = to_x + 10 + 'px';
+						break;
+
+					case 'b':
+						m_ctrl.style.top = to_y + 'px';
+						m_panel.style.height = to_y + 10 + 'px';
+						break;
+					case 'rb':
+						m_ctrl.style.left = to_x + 'px';
+						m_ctrl.style.top = to_y + 'px';
+
+						m_panel.style.width = to_x + 10 +'px';
+						m_panel.style.height = to_y + 10 + 'px';
+						break;
+				}
+				
+			}
+		}
+
+		
+		//7、当鼠标弹起的时候，清除定时器
+		document.onmouseup = function() {
+			clearInterval(moving);
+			moving = 0;
+			var cls = document.getElementsByClassName('re_ctrl');
+			for(var i=0; i<cls.length; i++) {
+				cls[i].style.left = '';
+				cls[i].style.top = '';
+			}
+		}
+
+		//1、动态的添加控制条
+		function resizable(panel_id) {
+			var p = document.getElementById(panel_id);
+			var r = document.createElement('div');
+			var b = document.createElement('div');
+			var rb = document.createElement('div');
+			r.class = r.className = 'resizable_r re_ctrl';
+			b.class = b.className = 'resizable_b re_ctrl';
+			rb.class = rb.className = 'resizable_rb re_ctrl';
+			p.appendChild(r);
+			p.appendChild(b);
+			p.appendChild(rb);
+
+			//2、为控制条添加监听事件
+			r.addEventListener('mousedown', function(e) {
+				on_mousedown(e, p, r, 'r');
+			});
+			b.addEventListener('mousedown', function(e) {
+				on_mousedown(e, p, b, 'b');
+			});
+			rb.addEventListener('mousedown', function(e) {
+				on_mousedown(e, p, rb, 'rb');
+			});
+		}
+
+		
+
+		window.onload = function() {
+			resizable('panel');
+		}
+		
+	</script>
+</body>
+</html>
